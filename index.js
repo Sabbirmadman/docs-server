@@ -66,3 +66,9 @@ app.listen(8000, () => {
     connectDB();
     console.log("Server is running on port 8000");
 });
+
+//get all the documents from the database
+app.get("/documents", async (req, res) => {
+    const documents = await Document.find();
+    res.json(documents);
+});
