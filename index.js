@@ -54,12 +54,29 @@ io.on("connection", (socket) => {
     });
 });
 
-async function findOrCreateDocument(id) {
+async function findOrCreateDocument(id, name) {
     if (id == null) return;
 
     const document = await Document.findById(id);
     if (document) return document;
-    return await Document.create({ _id: id, data: defaultValue });
+
+    if (name != null) {
+        const document = new Document({
+            _id: id,
+            documentName: name,
+            data: defaultValue,
+        });
+        await document.save();
+        return document;
+    } else {
+        const document = new Document({
+            _id: id,
+            documentName: id,
+            data: defaultValue,
+        });
+        await document.save();
+        return document;
+    }
 }
 
 app.listen(8000, () => {
@@ -71,4 +88,27 @@ app.listen(8000, () => {
 app.get("/documents", async (req, res) => {
     const documents = await Document.find();
     res.json(documents);
+});
+
+//get a single document from the database
+app.get("/documents/:id", async (req, res) => {
+    const document = await Document.findById(req.params.id);
+    res.json(document);
+});
+
+//Delete a document from the database
+app.delete("/documents/:id", async (req, res) => {
+    console.log(req.params.id);
+    const document = await Document.findByIdAndDelete(req.params.id);
+    res.json(document);
+});
+
+//update Document name
+app.put("/documents/:id", async (req, res) => {
+    console.log(req.params.id);
+
+    const document = await Document.findByIdAndUpdate(req.params.id, {
+        documentName: req.body.documentName,
+    });
+    res.json(document);
 });
